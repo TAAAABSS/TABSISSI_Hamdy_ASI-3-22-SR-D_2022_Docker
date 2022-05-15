@@ -15,8 +15,13 @@ l’architecture dans un fichier README.md :
 différentes étapes d’exécution des commandes associés aux services)
 - Architecture de l’application
 
-## /backend/Dockerfile
-```FROM node:14
+## ARCHITECTURE 
+![alt text](archi_project.png)
+
+## DOCKER 
+### /backend/Dockerfile
+```
+FROM node:14
 
 WORKDIR /app
 
@@ -31,15 +36,48 @@ EXPOSE 8080
 CMD ["npm","start"] 
 ```
 
-## /frontend/Dockerfile
+### /frontend/Dockerfile
 
-```FROM node:alpine as builder
+```
+FROM node:alpine as builder
+
 WORKDIR /frontend
+
 COPY ./package.json /frontend
+
 RUN npm install
+
 COPY . .
+
 CMD [ "npm", "run", "start" ] 
 ```
 
-![alt text](archi_project.png)
+### /docker-compose.yaml
+```
+version: "3.7"
+services:
+  mongodb:
+    image: "mongo"
+    ports:
+      - "12345:12345"
+    volumes:
+      - data:/data/db
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+volumes:
+  data:
+```
+
 
